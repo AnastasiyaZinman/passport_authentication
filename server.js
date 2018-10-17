@@ -39,28 +39,45 @@ passport.use(new LocalStrategy(
 
 
 app.post('/login', passport.authenticate('local', {
-  successRedirect: '/',
+  successRedirect: '/getUserDetails',//'/',
   failureRedirect: '/login?err',
 }));
-app.get('/userDetails', function (req, res){
+
+function authOnly(req,res,next){
   if (req.isAuthenticated()){
-    res.send(req.user);
+     next();
   } else {
-    res.redirect('/login');
+      res.redirect('/login');
   }
-});
+}
 // Catch all other routes and return the index file
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'src/login.html'));
 });
 
+app.get('/getUserDetails', authOnly, function (req, res){ 
+  res.send(req.user); 
+});
+
 // Point static path to dist
-app.use(express.static(path.join(__dirname, 'dist')));
+app.use(authOnly,express.static(path.join(__dirname, 'dist')));
 
 // Catch all other routes and return the index file
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist/index.html'));
+app.get('*',authOnly, (req, res) => { 
+  res.sendFile(path.join(__dirname, 'dist/index.html')); 
 });
+//log out
+app.get('/logout', function (req, res) {
+  req.logout();
+  res.send('Logged out!');
+});
+// // Point static path to dist
+// app.use(express.static(path.join(__dirname, 'dist')));
+
+// // Catch all other routes and return the index file
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'dist/index.html'));
+// });
  // Catch all other routes and return the index file
 app.use((err, req, res, next) => {
     res.status(500).send(err);
