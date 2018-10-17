@@ -21,6 +21,10 @@ passport.serializeUser(function(user, done) {
     console.log(user);
   done(null, user);
 });
+passport.deserializeUser(function(user, done) {
+  done(null, user);
+});
+
 
 passport.use(new LocalStrategy(
 //    { passReqToCallback : true},
@@ -38,7 +42,13 @@ app.post('/login', passport.authenticate('local', {
   successRedirect: '/',
   failureRedirect: '/login?err',
 }));
-
+app.get('/userDetails', function (req, res){
+  if (req.isAuthenticated()){
+    res.send(req.user);
+  } else {
+    res.redirect('/login');
+  }
+});
 // Catch all other routes and return the index file
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'src/login.html'));
